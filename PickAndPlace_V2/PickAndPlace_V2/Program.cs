@@ -19,33 +19,7 @@ namespace PickAndPlace
             Console.WriteLine("They must be separated with \"-\".");
             Console.WriteLine("example: dr-s-s-s-pg-x-y-rn-pn");
 
-            List<SMD> smdList = new List<SMD>();
-
-            string fileNameInput = Console.ReadLine();
-            List<string> stringLines = new List<string>();
-            try
-            {
-
-                using (StreamReader sr = new StreamReader(fileNameInput))
-                {
-                    string line;
-
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        stringLines.Add(line);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-
-                Console.WriteLine("The file could not be read:");
-                Console.WriteLine(e.Message);
-            }
-
-
-
-            List<string> setup = stringLines[0].ToLower().Split('-', StringSplitOptions.RemoveEmptyEntries).ToList();
+            List<string> setup = Console.ReadLine().ToLower().Split('-', StringSplitOptions.RemoveEmptyEntries).ToList();
             if (setup.Count < 6)
             {
                 setup = Console.ReadLine().ToLower().Split('-', StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -56,20 +30,17 @@ namespace PickAndPlace
             int yAxis = setup.IndexOf("y");
             int rotation = setup.IndexOf("rn");
             int partName = setup.IndexOf("pn");
-            int counter = 0;
 
-            foreach (string line in stringLines)
+            List<SMD> smdList = new List<SMD>();
+
+            while (true)
             {
+                List<string> input = Console.ReadLine().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                if (counter == 0)
+                if (input[0] == "end")
                 {
-                    counter = 1;
-                    continue;
+                    break;
                 }
-
-                List<string> input = line.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-
-
                 if (input.Count < 6)
                 {
                     continue;
@@ -203,8 +174,6 @@ namespace PickAndPlace
 
 
             }
-
-
             StringBuilder output = new StringBuilder();
             foreach (SMD smd in smdList)
             {
