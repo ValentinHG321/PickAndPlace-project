@@ -35,145 +35,194 @@ namespace PickAndPlace
 
             while (true)
             {
+                
                 List<string> input = Console.ReadLine().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-
                 if (input[0] == "end")
                 {
                     break;
                 }
-                if (input.Count < 6)
+
+                if (input.ElementAtOrDefault(designator) != null 
+                    && input.ElementAtOrDefault(package) != null 
+                    && input.ElementAtOrDefault(xAxis) != null
+                    && input.ElementAtOrDefault(yAxis) != null
+                    && input.ElementAtOrDefault(rotation) != null
+                    && input.ElementAtOrDefault(partName) != null)
                 {
-                    continue;
-                }
-                string patternRegexCapFarads = @"(?<farad>(([0-9]+)(\.))?([0-9]+)([munp]))";
-                string patternRegexCapVolts = @"(?<voltage>(([0-9]+)(\.))?(([0-9]+)([vV])))";
-                string patternRegexResistors = @"\b(([0-9]+)(\.)?([0-9]+)?([KkMRr]))?\b";
-                string patternRegexResNoIndication = @"\b([0-9]+)(\.)?([0-9]+)\b";
 
-                string sDesignator = input[designator];
-                string sPackage = input[package];
 
-                string[] packagePattern = new string[] { "0603", "0805", "1206", "1806", "1812", "1825", "2010", "2512", "2725", "2920" };
 
-                foreach (string pattern in packagePattern)
-                {
-                    if (sPackage.Contains(pattern))
+                    string patternRegexCapFarads = @"(?<farad>(([0-9]+)(\.))?([0-9]+)([munp]))";
+                    string patternRegexCapVolts = @"(?<voltage>(([0-9]+)(\.))?(([0-9]+)([vV])))";
+                    string patternRegexResistors = @"\b(([0-9]+)(\.)?([0-9]+)?([KkMRr]))?\b";
+                    string patternRegexResNoIndication = @"\b([0-9]+)(\.)?([0-9]+)\b";
+
+                    string sDesignator = input[designator];
+                    string sPackage = input[package];
+
+                    string[] packagePattern = new string[] { "0603", "0805", "1206", "1806", "1812", "1825", "2010", "2512", "2725", "2920" };
+
+                    foreach (string pattern in packagePattern)
                     {
-                        sPackage = pattern;
-                        if (sDesignator.Contains("R"))
+                        if (sPackage.Contains(pattern))
                         {
-                            sPackage = "R" + sPackage;
-                        }
-                        else if (sDesignator.Contains("C"))
-                        {
-                            sPackage = "C" + sPackage;
-                        }
-                        else if (sDesignator.Contains("L"))
-                        {
-                            sPackage = "L" + sPackage;
-                        }
-                        else if (sDesignator.Contains("D"))
-                        {
-                            sPackage = "D" + sPackage;
+                            sPackage = pattern;
+                            if (sDesignator.Contains("R"))
+                            {
+                                sPackage = "R" + sPackage;
+                            }
+                            else if (sDesignator.Contains("C"))
+                            {
+                                sPackage = "C" + sPackage;
+                            }
+                            else if (sDesignator.Contains("LED"))
+                            {
+                                sPackage = "LED" + sPackage;
+                            }
+                            else if (sDesignator.Contains("L"))
+                            {
+                                sPackage = "L" + sPackage;
+                            }
+                            else if (sDesignator.Contains("D"))
+                            {
+                                sPackage = "D" + sPackage;
+                            }
+                            else if (sDesignator.Contains("F"))
+                            {
+                                sPackage = "FB" + sPackage;
+                            }
+
                         }
                     }
-                }
 
-                string sXAxis = input[xAxis];
-                string sYAxis = input[yAxis];
-                string sRotation = input[rotation];
-                string sPartName = input[partName];
+                    string sXAxis = input[xAxis];
+                    string sYAxis = input[yAxis];
+                    string sRotation = input[rotation];
+                    string sPartName = input[partName];
 
-                Match matchCap = Regex.Match(sPartName, patternRegexCapFarads);
-                Match matchCapVolts = Regex.Match(sPartName, patternRegexCapVolts);
-                Match matchResistors = Regex.Match(sPartName, patternRegexResistors);
-                if (matchCap.Success)
-                {
-                    if (matchCap.Groups[3].Success)
+                    Match matchCap = Regex.Match(sPartName, patternRegexCapFarads);
+                    Match matchCapVolts = Regex.Match(sPartName, patternRegexCapVolts);
+                    Match matchResistors = Regex.Match(sPartName, patternRegexResistors);
+                    if (matchCap.Success)
                     {
-                        sPartName = matchCap.Groups[2].ToString() + matchCap.Groups[5].ToString();
+                        if (matchCap.Groups[3].Success)
+                        {
+                            sPartName = matchCap.Groups[2].ToString() + matchCap.Groups[5].ToString();
 
-                        bool check = matchCap.Groups[4].ToString() != "0" && matchCap.Groups[4].ToString() != "00";
+                            bool check = matchCap.Groups[4].ToString() != "0" && matchCap.Groups[4].ToString() != "00";
 
+                            if (check)
+                            {
+                                sPartName += matchCap.Groups[4].ToString();
+                            }
+
+                            if (matchCapVolts.Groups["voltage"].Success)
+                            {
+                                if (matchCapVolts.Groups[3].Success)
+                                {
+                                    sPartName += "/" + matchCapVolts.Groups[2].ToString() + matchCapVolts.Groups[6].ToString() + matchCapVolts.Groups[5].ToString();
+                                }
+                                else if (!matchCapVolts.Groups[3].Success)
+                                {
+                                    sPartName += "/" + matchCapVolts.Groups["voltage"].ToString();
+                                }
+                            }
+
+                        }
+                        else if (!matchCap.Groups[3].Success)
+                        {
+                            sPartName = matchCap.Groups["farad"].ToString();
+                            if (matchCapVolts.Groups["voltage"].Success)
+                            {
+                                if (matchCapVolts.Groups[3].Success)
+                                {
+                                    sPartName += "/" + matchCapVolts.Groups[2].ToString() + matchCapVolts.Groups[6].ToString() + matchCapVolts.Groups[5].ToString();
+                                }
+                                else if (!matchCapVolts.Groups[3].Success)
+                                {
+                                    sPartName += "/" + matchCapVolts.Groups["voltage"].ToString();
+                                }
+                            }
+                        }
+
+                    }
+                    if (matchResistors.Groups[1].Success)
+                    {
+                        if (matchResistors.Groups[3].Success)
+                        {
+                            sPartName = matchResistors.Groups[2].ToString() + matchResistors.Groups[5].ToString();
+                            bool check = matchResistors.Groups[4].ToString() != "0" || matchResistors.Groups[4].ToString() != "00";
+                            if (check)
+                            {
+                                sPartName += matchResistors.Groups[4].ToString();
+                            }
+                        }
+                        else if (!matchResistors.Groups[3].Success)
+                        {
+                            sPartName = matchResistors.Groups[0].ToString();
+                            if (input.Contains("1%"))
+                            {
+                                sPartName = $"{sPartName} 1%";
+                            }
+                            else if (input.Contains("5%"))
+                            {
+                                sPartName = $"{sPartName} 5%";
+                            }
+                        }
+
+                    }
+
+                    Match matchResNoInd = Regex.Match(sPartName, patternRegexResNoIndication);
+
+                    if (input.Contains("1%"))
+                    {
+                        sPartName += " 1%";
+                    }
+                    else if (input.Contains("5%"))
+                    {
+                        sPartName += " 5%";
+                    }
+
+                    if (matchResNoInd.Success)
+                    {
+                        int charR = sDesignator.IndexOf('R');
+                        bool check = charR != -1;
                         if (check)
                         {
-                            sPartName += matchCap.Groups[4].ToString();
-                        }
-
-                        if (matchCapVolts.Groups["voltage"].Success)
-                        {
-                            if (matchCapVolts.Groups[3].Success)
+                            if (matchResNoInd.Groups[2].Success)
                             {
-                                sPartName += "/" + matchCapVolts.Groups[2].ToString() + matchCapVolts.Groups[6].ToString() + matchCapVolts.Groups[5].ToString();
+                                sPartName = matchResNoInd.Groups[1].ToString() + 'R' + matchResNoInd.Groups[3].ToString();
                             }
-                            else if (!matchCapVolts.Groups[3].Success)
+                            else
                             {
-                                sPartName += "/" + matchCapVolts.Groups["voltage"].ToString();
+                                sPartName = matchResNoInd.Groups[0].ToString() + 'R';
                             }
                         }
 
                     }
-                    else if (!matchCap.Groups[3].Success)
-                    {
-                        sPartName = matchCap.Groups["farad"].ToString();
-                        if (matchCapVolts.Groups["voltage"].Success)
-                        {
-                            if (matchCapVolts.Groups[3].Success)
-                            {
-                                sPartName += "/" + matchCapVolts.Groups[2].ToString() + matchCapVolts.Groups[6].ToString() + matchCapVolts.Groups[5].ToString();
-                            }
-                            else if (!matchCapVolts.Groups[3].Success)
-                            {
-                                sPartName += "/" + matchCapVolts.Groups["voltage"].ToString();
-                            }
-                        }
-                    }
+
+                    SMD currentSMD = new SMD(sDesignator, sPackage, sXAxis, sYAxis, sRotation, sPartName);
+                    smdList.Add(currentSMD);
+
 
                 }
-                if (matchResistors.Groups[1].Success)
+                else
                 {
-                    if (matchResistors.Groups[3].Success)
+                    string InputErrorOutput = System.IO.Path.GetFullPath(Directory.GetCurrentDirectory() + @"\INPUT ERROR.txt");
+                    try
                     {
-                        sPartName = matchResistors.Groups[2].ToString() + matchResistors.Groups[5].ToString();
-                        bool check = matchResistors.Groups[4].ToString() != "0" || matchResistors.Groups[4].ToString() != "00";
-                        if (check)
-                        {
-                            sPartName += matchResistors.Groups[4].ToString();
-                        }
+                        StreamWriter sw = new StreamWriter(InputErrorOutput);
+                        sw.WriteLine("There is an empty column!!!");
+                        sw.Close();
                     }
-                    else if (!matchResistors.Groups[3].Success)
+                    catch (Exception message)
                     {
-                        sPartName = matchResistors.Groups[0].ToString();
-                        if (input.Contains("1%"))
-                        {
-                            sPartName = $"{sPartName} 1%";
-                        }
-                        else if (input.Contains("5%"))
-                        {
-                            sPartName = $"{sPartName} 5%";
-                        }
+                        throw new ArgumentException(message.Message);
                     }
+                    Environment.Exit(0);
                 }
-
-                Match matchResNoInd = Regex.Match(sPartName, patternRegexResNoIndication);
-
-                if (matchResNoInd.Success)
-                {
-                    if (matchResNoInd.Groups[2].Success)
-                    {
-                        sPartName = matchResNoInd.Groups[1].ToString() + 'R' + matchResNoInd.Groups[3].ToString();
-                    }
-                    else
-                    {
-                        sPartName = matchResNoInd.Groups[0].ToString() + 'R';
-                    }
-                }
-
-                SMD currentSMD = new SMD(sDesignator, sPackage, sXAxis, sYAxis, sRotation, sPartName);
-                smdList.Add(currentSMD);
-
-
             }
+
             StringBuilder output = new StringBuilder();
             foreach (SMD smd in smdList)
             {
@@ -192,6 +241,8 @@ namespace PickAndPlace
             {
                 throw new ArgumentException(message.Message);
             }
+
+
         }
     }
 }
