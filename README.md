@@ -1,4 +1,4 @@
-# PickAndPlace file converter to correct format.
+# PickAndPlace file converter to machine format.
 <pre>
 Update notes:
 Changes:
