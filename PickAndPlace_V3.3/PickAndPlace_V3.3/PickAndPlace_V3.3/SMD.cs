@@ -20,7 +20,7 @@
 
         public override string ToString()
         {
-            string output = $"\"{this.PartName} {this.Package}\" {this.Designator} {this.XAxis} {this.YAxis} {this.Rotation}";
+            string output = $"{this.Designator} \"{this.PartName} {this.Package}\" {this.XAxis} {this.YAxis} {this.Rotation}";
             return output;
         }
     }

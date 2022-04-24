@@ -18,6 +18,8 @@ namespace PickAndPlace
             Console.WriteLine("Use \"s\" to skip the unwanted columns.");
             Console.WriteLine("They must be separated with \"-\".");
             Console.WriteLine("example: dr-s-s-s-pg-x-y-rn-pn");
+            Console.WriteLine("Make sure that all empty columns are skipped");
+            Console.WriteLine("To execute the program use 'end' on new line");
 
             List<string> setup = Console.ReadLine().ToLower().Split('-', StringSplitOptions.RemoveEmptyEntries).ToList();
             if (setup.Count < 6)
@@ -30,20 +32,25 @@ namespace PickAndPlace
             int yAxis = setup.IndexOf("y");
             int rotation = setup.IndexOf("rn");
             int partName = setup.IndexOf("pn");
-
+            int lineCounter = 1;
             List<SMD> smdList = new List<SMD>();
 
             while (true)
             {
-                
-                List<string> input = Console.ReadLine().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                lineCounter++;
+                string stringInput = Console.ReadLine();
+                if (stringInput.Contains(','))
+                {
+                    stringInput = stringInput.Replace(',', '.');
+                }
+                List<string> input = stringInput.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries).ToList();
                 if (input[0] == "end")
                 {
                     break;
                 }
 
-                if (input.ElementAtOrDefault(designator) != null 
-                    && input.ElementAtOrDefault(package) != null 
+                if (input.ElementAtOrDefault(designator) != null
+                    && input.ElementAtOrDefault(package) != null
                     && input.ElementAtOrDefault(xAxis) != null
                     && input.ElementAtOrDefault(yAxis) != null
                     && input.ElementAtOrDefault(rotation) != null
@@ -60,7 +67,9 @@ namespace PickAndPlace
                     string sDesignator = input[designator];
                     string sPackage = input[package];
 
-                    string[] packagePattern = new string[] { "0603", "0805", "1206", "1806", "1812", "1825", "2010", "2512", "2725", "2920" };
+                    sPackage = sPackage.ToUpper();
+
+                    string[] packagePattern = new string[] { "0603", "0805", "1206", "1210", "1806", "1812", "1825", "2010", "2512", "2725", "2920", "ELC" };
 
                     foreach (string pattern in packagePattern)
                     {
@@ -144,13 +153,36 @@ namespace PickAndPlace
                                 }
                             }
                         }
-
+                        bool isOK = false;
+                        foreach (string item in packagePattern)
+                        {
+                            if (sPackage.Contains(item))
+                            {
+                                isOK = true;
+                            }
+                        }
+                        if (!isOK)
+                        {
+                            string InputErrorOutput = System.IO.Path.GetFullPath(Directory.GetCurrentDirectory() + @"\INPUT ERROR.txt");
+                            try
+                            {
+                                StreamWriter sw = new StreamWriter(InputErrorOutput);
+                                sw.WriteLine($"There is something missing at line {lineCounter}!!!");
+                                sw.Close();
+                            }
+                            catch (Exception message)
+                            {
+                                throw new ArgumentException(message.Message);
+                            }
+                            Environment.Exit(0);
+                        }
                     }
                     if (matchResistors.Groups[1].Success)
                     {
                         if (matchResistors.Groups[3].Success)
                         {
                             sPartName = matchResistors.Groups[2].ToString() + matchResistors.Groups[5].ToString();
+
                             bool check = matchResistors.Groups[4].ToString() != "0" || matchResistors.Groups[4].ToString() != "00";
                             if (check)
                             {
@@ -169,7 +201,10 @@ namespace PickAndPlace
                                 sPartName = $"{sPartName} 5%";
                             }
                         }
-
+                        if (sPartName.Contains('K'))
+                        {
+                            sPartName = sPartName.ToLower();
+                        }
                     }
 
                     Match matchResNoInd = Regex.Match(sPartName, patternRegexResNoIndication);
@@ -212,7 +247,7 @@ namespace PickAndPlace
                     try
                     {
                         StreamWriter sw = new StreamWriter(InputErrorOutput);
-                        sw.WriteLine("There is an empty column!!!");
+                        sw.WriteLine($"There is an empty column at line {lineCounter}!!!");
                         sw.Close();
                     }
                     catch (Exception message)
