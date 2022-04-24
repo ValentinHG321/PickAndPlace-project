@@ -6,4 +6,5 @@ In version 1 - Alpha test.
 In version 2 - reading\output only in console.
 In version 3 - its creating .txt file for output.
 In version 3.2 - improvement and bug fixes.
+In version 3.3 - fixing more stuff.
 <pre>
