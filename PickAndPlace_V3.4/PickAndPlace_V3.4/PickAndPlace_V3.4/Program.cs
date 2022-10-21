@@ -21,10 +21,10 @@ namespace PickAndPlace
             Console.WriteLine("Make sure that all empty columns are skipped");
             Console.WriteLine("To execute the program use 'end' on new line");
 
-            List<string> setup = Console.ReadLine().ToLower().Split('-', StringSplitOptions.RemoveEmptyEntries).ToList();
+            List<string> setup = Console.ReadLine().ToLower().Split(new char[] { ' ', '-', '\t' }, StringSplitOptions.RemoveEmptyEntries).ToList();
             if (setup.Count < 6)
             {
-                setup = Console.ReadLine().ToLower().Split('-', StringSplitOptions.RemoveEmptyEntries).ToList();
+                setup = Console.ReadLine().ToLower().Split(new char[] { ' ', '-', '\t' }, StringSplitOptions.RemoveEmptyEntries).ToList();
             }
             int designator = setup.IndexOf("dr");
             int package = setup.IndexOf("pg");
@@ -69,7 +69,7 @@ namespace PickAndPlace
 
                     sPackage = sPackage.ToUpper();
 
-                    string[] packagePattern = new string[] { "0603", "0805", "1206", "1210", "1806", "1812", "1825", "2010", "2512", "2725", "2920", "ELC" };
+                    string[] packagePattern = new string[] { "0402","0603", "0805", "1206", "1210", "1806", "1812", "1825", "2010", "2512", "2725", "2920", "ELC" ,"TAN_B" ,"TAN_A" , "TAN_C" , "TAN_D" ,"CAP", "IND" };
 
                     foreach (string pattern in packagePattern)
                     {
@@ -80,7 +80,7 @@ namespace PickAndPlace
                             {
                                 sPackage = "R" + sPackage;
                             }
-                            else if (sDesignator.Contains("C"))
+                            else if (sDesignator.Contains("C") && !sPackage.Contains("TAN"))
                             {
                                 sPackage = "C" + sPackage;
                             }
@@ -88,7 +88,7 @@ namespace PickAndPlace
                             {
                                 sPackage = "LED" + sPackage;
                             }
-                            else if (sDesignator.Contains("L"))
+                            else if (sDesignator.Contains("L") && !sPackage.Contains("IND"))
                             {
                                 sPackage = "L" + sPackage;
                             }
@@ -192,11 +192,11 @@ namespace PickAndPlace
                         else if (!matchResistors.Groups[3].Success)
                         {
                             sPartName = matchResistors.Groups[0].ToString();
-                            if (input.Contains("1%"))
+                            if (stringInput.Contains("1%"))
                             {
                                 sPartName = $"{sPartName} 1%";
                             }
-                            else if (input.Contains("5%"))
+                            else if (stringInput.Contains("5%"))
                             {
                                 sPartName = $"{sPartName} 5%";
                             }
@@ -206,17 +206,11 @@ namespace PickAndPlace
                             sPartName = sPartName.ToLower();
                         }
                     }
-
+                    if (sPackage.Contains("L")) 
+                    {
+                        sPartName = $"{sPartName}H";
+                    }
                     Match matchResNoInd = Regex.Match(sPartName, patternRegexResNoIndication);
-
-                    if (input.Contains("1%"))
-                    {
-                        sPartName += " 1%";
-                    }
-                    else if (input.Contains("5%"))
-                    {
-                        sPartName += " 5%";
-                    }
 
                     if (matchResNoInd.Success)
                     {
